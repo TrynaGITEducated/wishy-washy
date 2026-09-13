@@ -126,13 +126,13 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: calc(16px + var(--safe-top)) 16px calc(16px + var(--safe-bottom));
+    padding: calc(24px + var(--safe-top)) 16px calc(24px + var(--safe-bottom));
     perspective: 1800px;
   }
 
   .hint {
     position: absolute;
-    bottom: calc(24px + var(--safe-bottom));
+    bottom: calc(28px + var(--safe-bottom));
     left: 50%;
     transform: translateX(-50%);
     font-family: -apple-system, system-ui, sans-serif;
@@ -150,24 +150,43 @@
   }
 
   /* ================= CARD ================= */
-  /* The .book is ALWAYS wide enough to hold two pages side-by-side.
-     When closed, only the right half is visible (with the cover on top).
-     When opened, both halves are visible, centered. */
   .book {
     position: relative;
-    /* Size is based on the CLOSED (single page) width */
-    width: min(88vw, 340px, calc((100dvh - 140px) * 5 / 7));
+    width: min(90vw, 360px);
     aspect-ratio: 5 / 7;
     transform-style: preserve-3d;
     cursor: pointer;
-    transition: transform 1.1s cubic-bezier(0.4, 0.0, 0.2, 1);
-    /* Start centered as a single page */
-    transform: translateX(0);
+    transition: transform 0.9s cubic-bezier(0.4, 0.0, 0.2, 1);
   }
 
-  /* When opened, shift left by half the CLOSED width so both pages center */
+  /*
+    When the book opens, the cover rotates ~165deg around its left edge
+    (the hinge) and ends up as a mirror-image "page" extending to the
+    LEFT of the hinge, while .page-left stays in place, extending to
+    the RIGHT of the hinge. Together they form a roughly symmetric
+    two-page spread centered on the hinge point.
+
+    translateX(50%) with transform-origin: left center always moves
+    that hinge to the exact horizontal center of the book's flex
+    container, regardless of viewport width — so the spread is
+    centered no matter the screen size.
+
+    The spread itself is close to 2x the card's own width though, so
+    on narrow (mobile) screens, where the card is already ~90vw wide,
+    the full spread doesn't fit even when centered. The media queries
+    below scale the opened book down on small screens so both halves
+    stay fully on-screen.
+  */
   .book.open {
-    transform: translateX(-50%);
+    transform: translateX(50%);
+    transform-origin: left center;
+  }
+
+  @media (max-width: 500px) {
+    .book.open { transform: translateX(50%) scale(0.5); }
+  }
+  @media (min-width: 501px) and (max-width: 700px) {
+    .book.open { transform: translateX(50%) scale(0.65); }
   }
 
   .cover {
@@ -178,32 +197,29 @@
     transition: transform 1.3s cubic-bezier(0.55, 0.05, 0.25, 1);
     z-index: 2;
   }
-  .book.open .cover { transform: rotateY(-180deg); }
+  .book.open .cover { transform: rotateY(-165deg); }
 
-  /* Left page sits BEHIND the closed book, offset to the left.
-     It only becomes visible when the cover swings away. */
   .page-left {
     position: absolute;
     inset: 0;
     z-index: 1;
-    /* Shift left by one full page width so it sits "behind" the cover */
-    transform: translateX(-100%);
-    border-radius: 10px 6px 6px 10px;
+    border-radius: 6px 10px 10px 6px;
     overflow: hidden;
     background:
       radial-gradient(circle at 30% 80%, rgba(230, 57, 70, 0.18), transparent 60%),
       linear-gradient(200deg, #141417 0%, #0b0b0e 100%);
     border: 1px solid rgba(212, 175, 106, 0.35);
+    border-right: none;
     box-shadow:
-      inset 20px 0 40px rgba(0,0,0,0.6),
+      inset -20px 0 40px rgba(0,0,0,0.6),
       0 20px 60px rgba(0,0,0,0.7);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 16px 14px;
+    padding: 28px 24px;
     text-align: center;
-    gap: 6px;
+    gap: 8px;
   }
 
   .face {
@@ -271,8 +287,15 @@
     animation: ringSpin3D 13s linear infinite;
   }
 
-  .saturn-hero .ring-back { animation-duration: 15s; transform: rotateX(12deg) rotateZ(-4deg); }
-  .saturn-hero .ring-front { animation-duration: 11s; transform: rotateX(12deg) rotateZ(-4deg); }
+  .saturn-hero .ring-back {
+    animation-duration: 15s;
+    transform: rotateX(12deg) rotateZ(-4deg);
+  }
+
+  .saturn-hero .ring-front {
+    animation-duration: 11s;
+    transform: rotateX(12deg) rotateZ(-4deg);
+  }
 
   .sat-moon-orbit {
     transform-origin: 80px 80px;
@@ -312,7 +335,10 @@
     line-height: 1.45;
     margin-top: 4px;
   }
-  .front h1 .accent { color: var(--red-soft); font-style: italic; }
+  .front h1 .accent {
+    color: var(--red-soft);
+    font-style: italic;
+  }
   .front .sub {
     margin-top: 14px;
     font-family: -apple-system, system-ui, sans-serif;
@@ -388,18 +414,21 @@
   .book.open .inside p:nth-of-type(5) { transition-delay: 1.9s;  opacity: 1; transform: translateY(0); }
   .book.open .inside .signature       { opacity: 1; }
 
-  /* ---- Left page text ---- */
+  /* ---- Left page ---- */
   .page-left .big-text {
-    font-size: 18px;
+    font-size: 22px;
     color: var(--cream);
     line-height: 1.35;
-    margin-top: 2px;
+    margin-top: 4px;
   }
-  .page-left .big-text em { color: var(--red-soft); font-style: italic; }
+  .page-left .big-text em {
+    color: var(--red-soft);
+    font-style: italic;
+  }
 
-  /* ---- Constellation ---- */
+  /* ---- Constellation (self-drawing) ---- */
   .constellation {
-    margin-top: 6px;
+    margin-top: 10px;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -408,7 +437,7 @@
 
   .constellation svg {
     width: 100%;
-    max-width: 220px;
+    max-width: 240px;
     height: auto;
     overflow: visible;
   }
@@ -429,7 +458,10 @@
     transform: scale(0.3);
     transition: opacity 0.5s ease, transform 0.55s cubic-bezier(.34,1.56,.64,1);
   }
-  .book.open .constellation .c-star { opacity: 1; transform: scale(1); }
+  .book.open .constellation .c-star {
+    opacity: 1;
+    transform: scale(1);
+  }
 
   .constellation .c-halo {
     fill: rgba(240, 217, 155, 0.16);
@@ -451,8 +483,8 @@
 
   /* ---- Cosmic stamp ---- */
   .cosmic-stamp {
-    margin-top: 10px;
-    padding: 8px 12px;
+    margin-top: 14px;
+    padding: 10px 14px;
     border: 1px solid rgba(212,175,106,.28);
     border-radius: 5px;
     background: linear-gradient(135deg, rgba(230,57,70,.08), rgba(212,175,106,.04));
@@ -461,9 +493,27 @@
     letter-spacing: .12em;
     text-align: center;
   }
-  .cosmic-stamp span { display: block; color: var(--gold-soft); font-size: 12px; margin-bottom: 3px; }
-  .cosmic-stamp strong { display: block; color: rgba(241,233,219,.85); font-size: 8px; font-weight: 600; }
-  .cosmic-stamp small { display: block; margin-top: 4px; color: rgba(230,57,70,.9); font-size: 7px; }
+
+  .cosmic-stamp span {
+    display: block;
+    color: var(--gold-soft);
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  .cosmic-stamp strong {
+    display: block;
+    color: rgba(241,233,219,.85);
+    font-size: 8px;
+    font-weight: 600;
+  }
+
+  .cosmic-stamp small {
+    display: block;
+    margin-top: 5px;
+    color: rgba(230,57,70,.9);
+    font-size: 7px;
+  }
 
   .page-left > * {
     opacity: 0;
@@ -497,7 +547,6 @@
     * { animation: none !important; transition-duration: 0.01ms !important; }
     #confetti { display: none; }
     .book { transform: none !important; }
-    .book.open { transform: translateX(-50%) !important; }
     .constellation .c-star,
     .constellation .c-halo,
     .constellation .c-label,
@@ -507,10 +556,12 @@
 </head>
 <body>
 
+<!-- Starfield layers -->
 <div class="stars"  id="stars1"></div>
 <div class="stars2" id="stars2"></div>
 <div class="stars3" id="stars3"></div>
 
+<!-- Shooting stars -->
 <div class="shooting"    id="shoot1"></div>
 <div class="shooting s2" id="shoot2"></div>
 <div class="shooting s3" id="shoot3"></div>
@@ -525,8 +576,9 @@
 
     <!-- LEFT PAGE -->
     <div class="page-left">
-      <div class="big-text">You are <em>Star</em> Stuff</div>
+      <div class="big-text">You are <em> Star </em> Stuff </div>
 
+      <!-- Constellation spelling the name, drawn in on open -->
       <div class="constellation">
         <svg id="constellationSvg" viewBox="0 0 240 100"
              preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
@@ -535,7 +587,7 @@
       <div class="cosmic-stamp">
         <span>★</span>
         <strong>ORBITING ANOTHER YEAR</strong>
-        <small>STATUS: STILL LEGENDARY</small>
+        <small></small>
       </div>
     </div>
 
@@ -606,21 +658,18 @@
         <span class="moon m2"></span>
         <span class="moon m3"></span>
 
-        <h2 class="greeting" id="greetingInside">🪐 Happy Birthday, Shandré!</h2>
+        <h2 class="greeting" id="greetingInside">🪐 Geseendste verjaardag, Shandré!</h2>
 
-        <!-- ===================================================== -->
-        <!-- ✏️ YOUR CUSTOM MESSAGE GOES HERE                       -->
-        <!-- ===================================================== -->
 
-        <p>Write your first line here.<br/>Make it warm.</p>
-        <p>Second thought — something personal,<br/>something only you would say.</p>
-        <p>And a third line to close it out.</p>
+        <p>Hoop dat jy elke dag die geluk voel wat jy vandag ervaar<br/></p>
+        <p>Hemels geseënde verjaarsdag<br/>Al my gunsteling stêrre, sal altyd in you oë wees</p>
+        <p>..to be continued</p>
 
         <!-- ===================================================== -->
         <!-- END OF CUSTOM MESSAGE                                  -->
         <!-- ===================================================== -->
 
-        <div class="signature">— with love</div>
+        <div class="signature">— P.S. happy international chocolate day and stay weird</div>
       </div>
     </div>
   </div>
@@ -629,7 +678,7 @@
 </div>
 
 <script>
-  /* ---------- 1. Name from URL ---------- */
+  /* ---------- 1. Name from URL (defaults to Shandré) ---------- */
   const urlParams = new URLSearchParams(window.location.search);
   const rawName = urlParams.get('name') || urlParams.get('to') || '';
   const fallbackName = 'Shandré';
@@ -639,7 +688,7 @@
   (function applyName() {
     document.getElementById('nameFront').textContent = safeName;
     document.getElementById('greetingInside').textContent = `🪐 Happy Birthday, ${safeName}!`;
-    document.title = `Happy Birthday, ${safeName} 🪐`;
+    document.title = `Happy Bird-day, ${safeName} 🪐`;
   })();
 
   /* ---------- 2. Self-drawing constellation ---------- */
@@ -655,6 +704,7 @@
       const n = letters.length;
       const margin = 24;
       const usableW = W - margin * 2;
+
       for (let i = 0; i < n; i++) {
         const t = n === 1 ? 0.5 : i / (n - 1);
         const x = margin + usableW * t;
@@ -664,12 +714,16 @@
       }
     } else {
       const fallback = [
-        { x: 40,  y: 50 }, { x: 90,  y: 32 }, { x: 130, y: 54 },
-        { x: 170, y: 30 }, { x: 205, y: 52 },
+        { x: 40,  y: 50 },
+        { x: 90,  y: 32 },
+        { x: 130, y: 54 },
+        { x: 170, y: 30 },
+        { x: 205, y: 52 },
       ];
       fallback.forEach(p => nodes.push({ ...p, letter: '' }));
     }
 
+    // Timing (relative to card open)
     const START       = 1.05;
     const STAR_STEP   = 0.28;
     const LINE_DRAW   = 0.30;
@@ -677,13 +731,17 @@
 
     const connectors = [];
     for (let i = 0; i < nodes.length - 1; i++) {
-      const a = nodes[i], b = nodes[i + 1];
+      const a = nodes[i];
+      const b = nodes[i + 1];
       const len = Math.hypot(b.x - a.x, b.y - a.y);
 
       const line = document.createElementNS(NS, 'line');
-      line.setAttribute('x1', a.x); line.setAttribute('y1', a.y);
-      line.setAttribute('x2', b.x); line.setAttribute('y2', b.y);
+      line.setAttribute('x1', a.x);
+      line.setAttribute('y1', a.y);
+      line.setAttribute('x2', b.x);
+      line.setAttribute('y2', b.y);
       line.setAttribute('class', 'c-line');
+
       line.style.strokeDasharray  = len + ' ' + len;
       line.style.strokeDashoffset = len;
       line.style.transition = `stroke-dashoffset ${LINE_DRAW}s ease-out, opacity 0.2s ease`;
@@ -697,14 +755,16 @@
       const g = document.createElementNS(NS, 'g');
 
       const halo = document.createElementNS(NS, 'circle');
-      halo.setAttribute('cx', n.x); halo.setAttribute('cy', n.y);
+      halo.setAttribute('cx', n.x);
+      halo.setAttribute('cy', n.y);
       halo.setAttribute('r', 6);
       halo.setAttribute('class', 'c-halo');
       halo.style.transitionDelay = (START + i * STAR_STEP) + 's';
       g.appendChild(halo);
 
       const star = document.createElementNS(NS, 'circle');
-      star.setAttribute('cx', n.x); star.setAttribute('cy', n.y);
+      star.setAttribute('cx', n.x);
+      star.setAttribute('cy', n.y);
       star.setAttribute('r', 2.6);
       star.setAttribute('class', 'c-star');
       star.style.transitionDelay = (START + i * STAR_STEP) + 's';
@@ -712,7 +772,8 @@
 
       if (n.letter) {
         const label = document.createElementNS(NS, 'text');
-        label.setAttribute('x', n.x); label.setAttribute('y', n.y - 9);
+        label.setAttribute('x', n.x);
+        label.setAttribute('y', n.y - 9);
         label.setAttribute('class', 'c-label');
         label.textContent = n.letter;
         label.style.transitionDelay = (START + i * STAR_STEP + LABEL_DELAY) + 's';
@@ -778,9 +839,11 @@
       const top  = 3 + Math.random() * 55;
       const left = -30 + Math.random() * 45;
       const angle = 24 + Math.random() * 24;
+
       el.style.top = top + '%';
       el.style.left = left + '%';
       el.style.transform = `rotate(${angle}deg)`;
+
       el.classList.remove('run');
       void el.offsetWidth;
       el.classList.add('run');
@@ -789,14 +852,17 @@
     function schedule() {
       fireOne(shooters[idx]);
       idx = (idx + 1) % shooters.length;
+
       if (Math.random() < 0.42) {
         setTimeout(() => {
           fireOne(shooters[idx]);
           idx = (idx + 1) % shooters.length;
         }, 180 + Math.random() * 420);
       }
+
       setTimeout(schedule, 900 + Math.random() * 2600);
     }
+
     setTimeout(schedule, 900);
   })();
 
@@ -841,30 +907,56 @@
 
     function tick() {
       ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-      const gravity = 0.22, drag = 0.995;
+      const gravity = 0.22;
+      const drag = 0.995;
+
       for (let i = particles.length - 1; i >= 0; i--) {
         const p = particles[i];
         p.vy += gravity;
-        p.vx *= drag; p.vy *= drag;
-        p.x += p.vx; p.y += p.vy; p.rot += p.vrot; p.life++;
+        p.vx *= drag;
+        p.vy *= drag;
+        p.x += p.vx;
+        p.y += p.vy;
+        p.rot += p.vrot;
+        p.life++;
+
         const alpha = Math.max(0, 1 - p.life / p.maxLife);
-        if (alpha <= 0 || p.y > window.innerHeight + 40) { particles.splice(i, 1); continue; }
+        if (alpha <= 0 || p.y > window.innerHeight + 40) {
+          particles.splice(i, 1);
+          continue;
+        }
+
         ctx.save();
         ctx.globalAlpha = alpha;
-        ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
         ctx.fillStyle = p.color;
-        if (p.shape === 'rect') ctx.fillRect(-p.size/2, -p.size/4, p.size, p.size/2);
-        else { ctx.beginPath(); ctx.arc(0, 0, p.size/2, 0, Math.PI*2); ctx.fill(); }
+        if (p.shape === 'rect') {
+          ctx.fillRect(-p.size / 2, -p.size / 4, p.size, p.size / 2);
+        } else {
+          ctx.beginPath();
+          ctx.arc(0, 0, p.size / 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
         ctx.restore();
       }
-      if (particles.length > 0) requestAnimationFrame(tick);
-      else { running = false; ctx.clearRect(0, 0, window.innerWidth, window.innerHeight); }
+
+      if (particles.length > 0) {
+        requestAnimationFrame(tick);
+      } else {
+        running = false;
+        ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      }
     }
 
     function burst(x, y, count) {
       spawn(x, y, count || 90);
-      if (!running) { running = true; requestAnimationFrame(tick); }
+      if (!running) {
+        running = true;
+        requestAnimationFrame(tick);
+      }
     }
+
     return { burst };
   })();
 
@@ -888,7 +980,8 @@
           gain.gain.linearRampToValueAtTime(0.12, start + 0.02);
           gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.7);
           osc.connect(gain).connect(ctx.destination);
-          osc.start(start); osc.stop(start + 0.8);
+          osc.start(start);
+          osc.stop(start + 0.8);
         });
       } catch (e) {}
     }
@@ -930,10 +1023,11 @@
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
   });
 
-  /* ---------- 8. Desktop parallax ---------- */
+  /* ---------- 8. Subtle desktop parallax ---------- */
   (function cardParallax() {
     const canHover = window.matchMedia('(hover: hover)').matches;
     if (!canHover) return;
+
     book.addEventListener('pointermove', (e) => {
       if (book.classList.contains('open')) return;
       const r = book.getBoundingClientRect();
@@ -941,6 +1035,7 @@
       const y = (e.clientY - r.top) / r.height - 0.5;
       book.style.transform = `perspective(1200px) rotateY(${x * 7}deg) rotateX(${-y * 7}deg)`;
     });
+
     book.addEventListener('pointerleave', () => {
       book.style.transform = '';
     });
