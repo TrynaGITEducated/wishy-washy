@@ -126,13 +126,13 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: calc(24px + var(--safe-top)) 16px calc(24px + var(--safe-bottom));
+    padding: calc(16px + var(--safe-top)) 16px calc(16px + var(--safe-bottom));
     perspective: 1800px;
   }
 
   .hint {
     position: absolute;
-    bottom: calc(28px + var(--safe-bottom));
+    bottom: calc(24px + var(--safe-bottom));
     left: 50%;
     transform: translateX(-50%);
     font-family: -apple-system, system-ui, sans-serif;
@@ -150,15 +150,35 @@
   }
 
   /* ================= CARD ================= */
+  /* Book wrapper. Width is capped both by viewport width AND by viewport
+     height, so on short screens it shrinks rather than overflowing. */
   .book {
     position: relative;
-    width: min(90vw, 360px);
+    width: min(88vw, 340px, calc((100dvh - 140px) * 5 / 7));
     aspect-ratio: 5 / 7;
     transform-style: preserve-3d;
     cursor: pointer;
     transition: transform 0.9s cubic-bezier(0.4, 0.0, 0.2, 1);
   }
-  .book.open { transform: translateX(-25%); }
+
+  /* When open, the book "grows" to double width visually (left page + right page).
+     We shift it left by ~half its width so the pair stays centered on screen,
+     and scale down so the taller opened state fits the viewport. */
+  .book.open {
+    transform: translateX(-25%) scale(0.86);
+    transform-origin: center center;
+  }
+
+  /* Responsive shrink for shorter viewports (common on Android w/ browser bars) */
+  @media (max-height: 780px) {
+    .book.open { transform: translateX(-25%) scale(0.78); }
+  }
+  @media (max-height: 680px) {
+    .book.open { transform: translateX(-25%) scale(0.70); }
+  }
+  @media (max-height: 580px) {
+    .book.open { transform: translateX(-25%) scale(0.60); }
+  }
 
   .cover {
     position: absolute;
@@ -188,9 +208,9 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 28px 24px;
+    padding: 16px 14px;
     text-align: center;
-    gap: 8px;
+    gap: 6px;
   }
 
   .face {
@@ -387,10 +407,10 @@
 
   /* ---- Left page ---- */
   .page-left .big-text {
-    font-size: 22px;
+    font-size: 18px;
     color: var(--cream);
     line-height: 1.35;
-    margin-top: 4px;
+    margin-top: 2px;
   }
   .page-left .big-text em {
     color: var(--red-soft);
@@ -399,7 +419,7 @@
 
   /* ---- Constellation (self-drawing) ---- */
   .constellation {
-    margin-top: 10px;
+    margin-top: 6px;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -408,7 +428,7 @@
 
   .constellation svg {
     width: 100%;
-    max-width: 240px;
+    max-width: 220px;
     height: auto;
     overflow: visible;
   }
@@ -454,8 +474,8 @@
 
   /* ---- Cosmic stamp ---- */
   .cosmic-stamp {
-    margin-top: 14px;
-    padding: 10px 14px;
+    margin-top: 10px;
+    padding: 8px 12px;
     border: 1px solid rgba(212,175,106,.28);
     border-radius: 5px;
     background: linear-gradient(135deg, rgba(230,57,70,.08), rgba(212,175,106,.04));
@@ -468,8 +488,8 @@
   .cosmic-stamp span {
     display: block;
     color: var(--gold-soft);
-    font-size: 13px;
-    margin-bottom: 4px;
+    font-size: 12px;
+    margin-bottom: 3px;
   }
 
   .cosmic-stamp strong {
@@ -481,7 +501,7 @@
 
   .cosmic-stamp small {
     display: block;
-    margin-top: 5px;
+    margin-top: 4px;
     color: rgba(230,57,70,.9);
     font-size: 7px;
   }
@@ -547,9 +567,8 @@
 
     <!-- LEFT PAGE -->
     <div class="page-left">
-      <div class="big-text">You are <em> Star </em> Stuff </div>
+      <div class="big-text">You are <em>Star</em> Stuff</div>
 
-      <!-- Constellation spelling the name, drawn in on open -->
       <div class="constellation">
         <svg id="constellationSvg" viewBox="0 0 240 100"
              preserveAspectRatio="xMidYMid meet" aria-hidden="true"></svg>
@@ -558,7 +577,7 @@
       <div class="cosmic-stamp">
         <span>★</span>
         <strong>ORBITING ANOTHER YEAR</strong>
-        <small></small>
+        <small>STATUS: STILL LEGENDARY</small>
       </div>
     </div>
 
@@ -629,18 +648,24 @@
         <span class="moon m2"></span>
         <span class="moon m3"></span>
 
-        <h2 class="greeting" id="greetingInside">🪐 Geseendste verjaardag, Shandré!</h2>
+        <h2 class="greeting" id="greetingInside">🪐 Happy Birthday, Shandré!</h2>
 
+        <!-- ===================================================== -->
+        <!-- ✏️ YOUR CUSTOM MESSAGE GOES HERE                       -->
+        <!-- Each <p> fades in one after the other.                 -->
+        <!-- Use <br/> for line breaks. Use <em> for italic accent. -->
+        <!-- Add up to 5 paragraphs — more will still work.         -->
+        <!-- ===================================================== -->
 
-        <p>Hoop dat jy elke dag die geluk voel wat jy vandag ervaar<br/></p>
-        <p>Hemels geseënde verjaarsdag<br/>Al my gunsteling stêrre, sal altyd in you oë wees</p>
-        <p>..to be continued</p>
+        <p>Write your first line here.<br/>Make it warm.</p>
+        <p>Second thought — something personal,<br/>something only you would say.</p>
+        <p>And a third line to close it out.</p>
 
         <!-- ===================================================== -->
         <!-- END OF CUSTOM MESSAGE                                  -->
         <!-- ===================================================== -->
 
-        <div class="signature">— P.S. happy international chocolate day and stay weird</div>
+        <div class="signature">— with love</div>
       </div>
     </div>
   </div>
@@ -659,7 +684,7 @@
   (function applyName() {
     document.getElementById('nameFront').textContent = safeName;
     document.getElementById('greetingInside').textContent = `🪐 Happy Birthday, ${safeName}!`;
-    document.title = `Happy Bird-day, ${safeName} 🪐`;
+    document.title = `Happy Birthday, ${safeName} 🪐`;
   })();
 
   /* ---------- 2. Self-drawing constellation ---------- */
@@ -694,7 +719,6 @@
       fallback.forEach(p => nodes.push({ ...p, letter: '' }));
     }
 
-    // Timing (relative to card open)
     const START       = 1.05;
     const STAR_STEP   = 0.28;
     const LINE_DRAW   = 0.30;
